@@ -33,7 +33,9 @@ function toast(message, type = 'success') {
     const el = document.getElementById('toast');
     el.textContent = message;
     el.className = `toast show ${type === 'error' ? 'error' : ''}`;
-    setTimeout(() => el.className = 'toast', 3200);
+    setTimeout(() => {
+        el.className = 'toast';
+    }, 3200);
 }
 
 async function request(url, options = {}) {
@@ -82,11 +84,24 @@ function dataTexto(data) {
     return data ? new Date(data).toLocaleString('pt-BR') : 'Data não informada';
 }
 
+function foodEmoji(nome = '') {
+    const lower = nome.toLowerCase();
+    if (lower.includes('pizza')) return '🍕';
+    if (lower.includes('hamb') || lower.includes('burger')) return '🍔';
+    if (lower.includes('batata') || lower.includes('frita')) return '🍟';
+    if (lower.includes('sushi')) return '🍣';
+    if (lower.includes('bolo') || lower.includes('doce')) return '🍰';
+    if (lower.includes('taco') || lower.includes('nacho')) return '🌮';
+    if (lower.includes('salada')) return '🥗';
+    if (lower.includes('suco')) return '🧃';
+    if (lower.includes('refrigerante') || lower.includes('cola') || lower.includes('bebida')) return '🥤';
+    return '🍽️';
+}
+
 function itensDaPagina(nome, lista) {
     const totalPaginas = Math.max(1, Math.ceil(lista.length / state.porPagina));
     if (state.paginas[nome] > totalPaginas) state.paginas[nome] = totalPaginas;
     if (state.paginas[nome] < 1) state.paginas[nome] = 1;
-
     const inicio = (state.paginas[nome] - 1) * state.porPagina;
     return lista.slice(inicio, inicio + state.porPagina);
 }
@@ -121,9 +136,11 @@ function mudarPagina(nome, pagina) {
     state.paginas[nome] = Math.min(Math.max(1, pagina), totalPaginas);
     renderTudo();
 }
+window.mudarPagina = mudarPagina;
 
 function preencherSelect(selectId, items, valueKey, labelFn, emptyText) {
     const select = document.getElementById(selectId);
+    if (!select) return;
     select.innerHTML = '';
     if (!items.length) {
         select.innerHTML = `<option value="">${emptyText}</option>`;
@@ -149,9 +166,20 @@ function renderDashboard() {
     if (ultimoPedido) {
         const item = state.itens.find(i => i.idPedido === ultimoPedido.idPedido);
         document.getElementById('preview-status').textContent = statusTexto(ultimoPedido.statusAtual);
-        document.getElementById('preview-title').textContent = item ? produtoNome(item.idProduto) : `Pedido #${ultimoPedido.idPedido}`;
+        document.getElementById('preview-title').textContent = item ? `${foodEmoji(produtoNome(item.idProduto))} ${produtoNome(item.idProduto)}` : `🧾 Pedido #${ultimoPedido.idPedido}`;
         document.getElementById('preview-subtitle').textContent = `${clienteNome(ultimoPedido.idCliente)} • ${money.format(ultimoPedido.valorTotal || 0)}`;
     }
+
+    const tbody = document.getElementById('dashboard-pedidos');
+    const recentes = [...state.pedidos].sort((a, b) => (b.idPedido || 0) - (a.idPedido || 0)).slice(0, 4);
+    tbody.innerHTML = recentes.map(pedido => `
+        <tr>
+            <td>#${pedido.idPedido}</td>
+            <td>${clienteNome(pedido.idCliente)}</td>
+            <td><span class="status">${statusTexto(pedido.statusAtual)}</span></td>
+            <td>${money.format(pedido.valorTotal || 0)}</td>
+        </tr>
+    `).join('') || '<tr><td colspan="4">Nenhum pedido cadastrado ainda.</td></tr>';
 }
 
 function renderClientes() {
@@ -162,7 +190,7 @@ function renderClientes() {
     container.innerHTML = pagina.map(cliente => `
         <article class="data-card">
             <div>
-                <strong>${cliente.nome}</strong>
+                <strong>👤 ${cliente.nome}</strong>
                 <span>${cliente.email || 'E-mail não informado'} • ${cliente.telefone || 'Telefone não informado'}</span><br>
                 <span>${cliente.cidade || 'Cidade não informada'}${cliente.estado ? `/${cliente.estado}` : ''}</span>
             </div>
@@ -180,9 +208,12 @@ function renderProdutos() {
 
     container.innerHTML = pagina.map(produto => `
         <article class="product-card">
-            <div>
-                <strong>${produto.nome}</strong>
-                <span>Estoque: ${produto.estoque ?? 0} unidade(s)</span>
+            <div class="product-main">
+                <div class="food-marker">${foodEmoji(produto.nome)}</div>
+                <div>
+                    <strong>${produto.nome}</strong>
+                    <span>Estoque: ${produto.estoque ?? 0} unidade(s)</span>
+                </div>
             </div>
             <div class="price">${money.format(produto.preco || 0)}</div>
         </article>
@@ -224,7 +255,7 @@ function renderPagamentos() {
     container.innerHTML = pagina.map(pagamento => `
         <article class="payment-card">
             <div>
-                <strong>Pedido #${pagamento.idPedido} • ${pagamento.metodoPagamento || 'Método não informado'}</strong>
+                <strong>💳 Pedido #${pagamento.idPedido} • ${pagamento.metodoPagamento || 'Método não informado'}</strong>
                 <span>${pagamento.statusPagamento || 'Status não informado'} • ${dataTexto(pagamento.dataPagamento)}</span>
             </div>
             <div class="price">${money.format(pagamento.valor || 0)}</div>
@@ -259,7 +290,7 @@ function renderEntregas() {
 
     container.innerHTML = pagina.map(entrega => `
         <article class="delivery-card">
-            <strong>Pedido #${entrega.idPedido}</strong>
+            <strong>🛵 Pedido #${entrega.idPedido}</strong>
             <span>${entrega.statusEntrega || 'Sem status'} • ${entrega.transporte || 'Transporte não informado'}</span><br>
             <span>Código: ${entrega.codigoRastreio || 'Não informado'}</span>
         </article>
@@ -308,6 +339,7 @@ async function carregarTudo() {
         toast(error.message, 'error');
     }
 }
+window.carregarTudo = carregarTudo;
 
 async function atualizarStatus(idPedido, status) {
     try {
@@ -318,11 +350,13 @@ async function atualizarStatus(idPedido, status) {
         toast(error.message, 'error');
     }
 }
+window.atualizarStatus = atualizarStatus;
 
 function bindForm(formId, url, successMessage) {
-    document.getElementById(formId).addEventListener('submit', async event => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    form.addEventListener('submit', async event => {
         event.preventDefault();
-        const form = event.currentTarget;
         try {
             const body = formToObject(form);
             await request(url, { method: 'POST', body: JSON.stringify(body) });
@@ -335,6 +369,42 @@ function bindForm(formId, url, successMessage) {
     });
 }
 
+function activateScreen(name) {
+    const screenName = name || 'dashboard';
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+
+    const target = document.getElementById(`screen-${screenName}`) || document.getElementById('screen-dashboard');
+    target.classList.add('active');
+
+    const activeLink = document.querySelector(`.nav-link[href="#${screenName}"]`) || document.querySelector('.nav-link[href="#dashboard"]');
+    if (activeLink) activeLink.classList.add('active');
+}
+
+function syncScreenFromHash() {
+    const hash = window.location.hash.replace('#', '') || 'dashboard';
+    activateScreen(hash);
+}
+
+function bindNavigation() {
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', event => {
+            const target = event.currentTarget.getAttribute('href').replace('#', '');
+            activateScreen(target);
+        });
+    });
+
+    document.querySelectorAll('[data-screen]').forEach(button => {
+        button.addEventListener('click', () => {
+            const target = button.dataset.screen;
+            window.location.hash = target;
+            activateScreen(target);
+        });
+    });
+
+    window.addEventListener('hashchange', syncScreenFromHash);
+}
+
 bindForm('form-cliente', endpoints.clientes, 'Cliente cadastrado com sucesso.');
 bindForm('form-produto', endpoints.produtos, 'Produto cadastrado com sucesso.');
 bindForm('form-pedido', endpoints.pedidos, 'Pedido criado com sucesso.');
@@ -342,4 +412,8 @@ bindForm('form-item', endpoints.itens, 'Item adicionado ao pedido.');
 bindForm('form-pagamento', endpoints.pagamentos, 'Pagamento registrado.');
 bindForm('form-entrega', endpoints.entregas, 'Entrega registrada.');
 
-window.addEventListener('DOMContentLoaded', carregarTudo);
+window.addEventListener('DOMContentLoaded', () => {
+    bindNavigation();
+    syncScreenFromHash();
+    carregarTudo();
+});
