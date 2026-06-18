@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrderFlow | Gestão de Pedidos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">OF</div>
+            <div>
+                <strong>OrderFlow</strong>
+                <span>Gestão de Pedidos</span>
+            </div>
+        </div>
+
+        <nav>
+            <a href="#dashboard" class="nav-link active">Dashboard</a>
+            <a href="#cadastros" class="nav-link">Cadastros</a>
+            <a href="#pedidos" class="nav-link">Pedidos</a>
+            <a href="#financeiro" class="nav-link">Pagamentos</a>
+            <a href="#historico" class="nav-link">Histórico</a>
+        </nav>
+
+        <div class="sidebar-card">
+            <span>Status</span>
+            <strong id="api-status">Verificando...</strong>
+            <small>Aplicação em execução</small>
+        </div>
+    </aside>
+
+    <main class="app">
+        <section class="hero" id="dashboard">
+            <div>
+                <p class="eyebrow">Sistema de gerenciamento de pedidos</p>
+                <h1>Controle clientes, produtos, pedidos, pagamentos e entregas em um só lugar.</h1>
+                <p class="hero-text">Organize o fluxo de atendimento, acompanhe pedidos e registre as etapas principais da operação OrderFlow.</p>
+                <div class="hero-actions">
+                    <button class="primary" onclick="document.querySelector('#form-pedido').scrollIntoView({behavior:'smooth'})">Criar pedido</button>
+                    <button class="ghost" onclick="carregarTudo()">Atualizar dados</button>
+                </div>
+            </div>
+            <div class="order-preview">
+                <div class="ticket-header">
+                    <span>Pedido em andamento</span>
+                    <strong id="preview-status">ENVIADO</strong>
+                </div>
+                <h3 id="preview-title">Combo da Casa</h3>
+                <p id="preview-subtitle">Pagamento aprovado • Entrega em trânsito</p>
+                <div class="progress-line"><span></span></div>
+            </div>
+        </section>
+
+        <section class="metrics-grid">
+            <article class="metric-card">
+                <span>Clientes</span>
+                <strong id="total-clientes">0</strong>
+                <small>pessoas cadastradas</small>
+            </article>
+            <article class="metric-card">
+                <span>Produtos</span>
+                <strong id="total-produtos">0</strong>
+                <small>itens no cardápio</small>
+            </article>
+            <article class="metric-card">
+                <span>Pedidos</span>
+                <strong id="total-pedidos">0</strong>
+                <small>pedidos registrados</small>
+            </article>
+            <article class="metric-card">
+                <span>Faturamento</span>
+                <strong id="total-faturamento">R$ 0,00</strong>
+                <small>somatório dos pedidos</small>
+            </article>
+        </section>
+
+        <section class="content-grid" id="cadastros">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Cadastro</p>
+                        <h2>Novo cliente</h2>
+                    </div>
+                </div>
+                <form id="form-cliente" class="form-grid">
+                    <input name="nome" placeholder="Nome" required>
+                    <input name="email" placeholder="E-mail" required>
+                    <input name="telefone" placeholder="Telefone" required>
+                    <input name="logradouro" placeholder="Logradouro">
+                    <input name="numero" type="number" placeholder="Número">
+                    <input name="bairro" placeholder="Bairro">
+                    <input name="cidade" placeholder="Cidade">
+                    <input name="cep" placeholder="CEP">
+                    <input name="complemento" placeholder="Complemento">
+                    <input name="estado" placeholder="UF" maxlength="2">
+                    <button class="primary full" type="submit">Salvar cliente</button>
+                </form>
+
+                <div class="list-header">
+                    <h3>Clientes cadastrados</h3>
+                </div>
+                <div class="cards-list" id="lista-clientes"></div>
+                <div class="pagination" id="pagination-clientes"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Cardápio</p>
+                        <h2>Novo produto</h2>
+                    </div>
+                </div>
+                <form id="form-produto" class="form-grid compact">
+                    <input name="nome" placeholder="Nome do produto" required>
+                    <input name="preco" type="number" step="0.01" placeholder="Preço" required>
+                    <input name="estoque" type="number" placeholder="Estoque" required>
+                    <button class="primary full" type="submit">Salvar produto</button>
+                </form>
+
+                <div class="list-header">
+                    <h3>Produtos cadastrados</h3>
+                </div>
+                <div class="cards-list" id="lista-produtos"></div>
+                <div class="pagination" id="pagination-produtos"></div>
+            </div>
+        </section>
+
+        <section class="content-grid" id="pedidos">
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Pedido</p>
+                        <h2>Criar pedido</h2>
+                    </div>
+                </div>
+                <form id="form-pedido" class="form-grid compact">
+                    <select name="idCliente" id="select-cliente" required></select>
+                    <button class="primary full" type="submit">Abrir pedido</button>
+                </form>
+
+                <form id="form-item" class="form-grid compact divided">
+                    <select name="idPedido" id="select-pedido-item" required></select>
+                    <select name="idProduto" id="select-produto" required></select>
+                    <input name="quantidade" type="number" min="1" placeholder="Quantidade" required>
+                    <input name="obs" placeholder="Observação">
+                    <button class="secondary full" type="submit">Adicionar item</button>
+                </form>
+
+                <form id="form-pagamento" class="form-grid compact divided">
+                    <select name="idPedido" id="select-pedido-pagamento" required></select>
+                    <select name="metodoPagamento" required>
+                        <option value="PIX">PIX</option>
+                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                        <option value="Cartão de Débito">Cartão de Débito</option>
+                        <option value="Dinheiro">Dinheiro</option>
+                    </select>
+                    <input name="valor" type="number" step="0.01" placeholder="Valor opcional">
+                    <button class="secondary full" type="submit">Registrar pagamento</button>
+                </form>
+
+                <form id="form-entrega" class="form-grid compact divided">
+                    <select name="idPedido" id="select-pedido-entrega" required></select>
+                    <input name="codigoRastreio" placeholder="Código de rastreio">
+                    <input name="transporte" placeholder="Transporte / motoboy">
+                    <button class="secondary full" type="submit">Registrar envio</button>
+                </form>
+            </div>
+
+            <div class="panel wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Fluxo operacional</p>
+                        <h2>Pedidos cadastrados</h2>
+                    </div>
+                    <button class="ghost small" onclick="carregarTudo()">Recarregar</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-pedidos"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="pagination-pedidos"></div>
+            </div>
+        </section>
+
+        <section class="content-grid" id="financeiro">
+            <div class="panel wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Financeiro</p>
+                        <h2>Pagamentos registrados</h2>
+                    </div>
+                </div>
+                <div class="cards-list" id="lista-pagamentos"></div>
+                <div class="pagination" id="pagination-pagamentos"></div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Entregas</p>
+                        <h2>Envios</h2>
+                    </div>
+                </div>
+                <div class="cards-list" id="lista-entregas"></div>
+                <div class="pagination" id="pagination-entregas"></div>
+            </div>
+        </section>
+
+        <section class="content-grid" id="historico">
+            <div class="panel wide">
+                <div class="panel-header">
+                    <div>
+                        <p class="eyebrow">Rastreamento</p>
+                        <h2>Histórico de status</h2>
+                    </div>
+                </div>
+                <div class="timeline" id="timeline"></div>
+                <div class="pagination" id="pagination-historico"></div>
+            </div>
+        </section>
+
+        <div id="toast" class="toast"></div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

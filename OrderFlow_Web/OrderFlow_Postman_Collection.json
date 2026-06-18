@@ -1,0 +1,144 @@
+{
+  "info": {
+    "name": "OrderFlow - API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Clientes - Listar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/clientes"
+      }
+    },
+    {
+      "name": "Clientes - Criar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Evelyn Santos\",\n  \"email\": \"evelyn@email.com\",\n  \"telefone\": \"81999999999\",\n  \"logradouro\": \"Rua Exemplo\",\n  \"numero\": 123,\n  \"bairro\": \"Centro\",\n  \"cidade\": \"Recife\",\n  \"cep\": \"50000000\",\n  \"complemento\": \"Casa\",\n  \"estado\": \"PE\"\n}"
+        },
+        "url": "{{baseUrl}}/clientes"
+      }
+    },
+    {
+      "name": "Produtos - Listar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/produtos"
+      }
+    },
+    {
+      "name": "Produtos - Criar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Hambúrguer Artesanal\",\n  \"preco\": 25.9,\n  \"estoque\": 20\n}"
+        },
+        "url": "{{baseUrl}}/produtos"
+      }
+    },
+    {
+      "name": "Pedidos - Listar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/pedidos"
+      }
+    },
+    {
+      "name": "Pedidos - Criar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idCliente\": 1\n}"
+        },
+        "url": "{{baseUrl}}/pedidos"
+      }
+    },
+    {
+      "name": "Contem - Adicionar item",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idPedido\": 1,\n  \"idProduto\": 1,\n  \"quantidade\": 2,\n  \"obs\": \"Sem cebola\"\n}"
+        },
+        "url": "{{baseUrl}}/contem"
+      }
+    },
+    {
+      "name": "Pagamentos - Registrar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idPedido\": 1,\n  \"metodoPagamento\": \"PIX\"\n}"
+        },
+        "url": "{{baseUrl}}/pagamentos"
+      }
+    },
+    {
+      "name": "Entregas - Registrar",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"idPedido\": 1,\n  \"codigoRastreio\": \"OF-0002\",\n  \"transporte\": \"Equipe de entrega\"\n}"
+        },
+        "url": "{{baseUrl}}/entregas"
+      }
+    },
+    {
+      "name": "Histórico - Listar",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/historico-status"
+      }
+    }
+  ]
+}
