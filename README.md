@@ -21,8 +21,7 @@ OrderFlow é uma aplicação web desenvolvida com Spring Boot para gerenciar cli
 - Spring Boot
 - Spring Web
 - Spring Data JPA
-- H2 Database para execução local
-- PostgreSQL disponível por perfil de configuração
+- PostgreSQL como banco de dados principal
 - HTML, CSS e JavaScript
 - Docker para deploy
 
